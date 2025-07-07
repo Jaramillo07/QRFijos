@@ -112,11 +112,11 @@ def main():
     st.markdown("---")
     
     # Información
-    st.info("💡 **Genera códigos QR para cada miembro de la familia** - Cada familiar tendrá su propio código único")
+    st.info("💡 **Genera códigos QR para colonos** - Cada colono tendrá su propio código único")
     
-    # Inicializar session state para los familiares
-    if 'familiares_list' not in st.session_state:
-        st.session_state.familiares_list = [""]  # Comenzar con un campo vacío
+    # Inicializar session state para los colonos
+    if 'colonos_list' not in st.session_state:
+        st.session_state.colonos_list = [""]  # Comenzar con un campo vacío
     
     # Formulario principal
     with st.form("qr_familia_form", clear_on_submit=True):
@@ -130,37 +130,37 @@ def main():
         )
         
         st.markdown("---")
-        st.subheader("👨‍👩‍👧‍👦 Familiares (Cada uno tendrá su QR)")
+        st.subheader("👤 Colonos (Cada uno tendrá su QR)")
         
-        # Mostrar campos para familiares
-        familiares_input = []
+        # Mostrar campos para colonos
+        colonos_input = []
         
         # Crear columnas para organizar mejor
-        for i, familiar in enumerate(st.session_state.familiares_list):
+        for i, colono in enumerate(st.session_state.colonos_list):
             col1, col2 = st.columns([4, 1])
             
             with col1:
                 nombre = st.text_input(
-                    f"👤 Familiar #{i+1}:",
-                    value=familiar,
-                    placeholder=f"Ej: María González (Esposa), Juan González (Hijo), etc.",
-                    key=f"familiar_{i}",
-                    help="Nombre completo del familiar"
+                    f"👤 Colono #{i+1}:",
+                    value=colono,
+                    placeholder=f"Ej: Jesús Jaramillo González, María Elena González, etc.",
+                    key=f"colono_{i}",
+                    help="Nombre completo del colono"
                 )
-                familiares_input.append(nombre)
+                colonos_input.append(nombre)
             
             with col2:
                 # Botón para eliminar (solo si hay más de 1)
-                if len(st.session_state.familiares_list) > 1:
-                    if st.form_submit_button(f"🗑️", key=f"remove_{i}", help="Eliminar familiar"):
-                        st.session_state.familiares_list.pop(i)
+                if len(st.session_state.colonos_list) > 1:
+                    if st.form_submit_button(f"🗑️", key=f"remove_{i}", help="Eliminar colono"):
+                        st.session_state.colonos_list.pop(i)
                         st.rerun()
         
-        # Botón para agregar más familiares
+        # Botón para agregar más colonos
         col1, col2, col3 = st.columns([2, 1, 2])
         with col2:
-            if st.form_submit_button("➕ Agregar Familiar"):
-                st.session_state.familiares_list.append("")
+            if st.form_submit_button("➕ Agregar Colono"):
+                st.session_state.colonos_list.append("")
                 st.rerun()
         
         st.markdown("---")
@@ -188,36 +188,36 @@ def main():
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
             generar_btn = st.form_submit_button(
-                "🎫 Generar QRs para Familia",
+                "🎫 Generar QRs para Colonos",
                 type="primary",
                 use_container_width=True
             )
         
         # Procesar formulario
         if generar_btn:
-            # Actualizar la lista de familiares
-            st.session_state.familiares_list = familiares_input
+            # Actualizar la lista de colonos
+            st.session_state.colonos_list = colonos_input
             
             # Filtrar nombres vacíos
-            familiares_validos = [nombre.strip() for nombre in familiares_input if nombre.strip()]
+            colonos_validos = [nombre.strip() for nombre in colonos_input if nombre.strip()]
             
             if not domicilio.strip():
                 st.error("❌ Debe ingresar el domicilio")
-            elif not familiares_validos:
-                st.error("❌ Debe ingresar al menos un familiar")
+            elif not colonos_validos:
+                st.error("❌ Debe ingresar al menos un colono")
             else:
-                with st.spinner(f"Generando QRs para {len(familiares_validos)} familiares..."):
+                with st.spinner(f"Generando QRs para {len(colonos_validos)} colono(s)..."):
                     
                     # Limpiar datos
                     domicilio_clean = domicilio.strip()
                     
-                    # Generar códigos QR para cada familiar
+                    # Generar códigos QR para cada colono
                     qr_results = []
                     
-                    for i, nombre_familiar in enumerate(familiares_validos):
-                        nombre_clean = nombre_familiar.strip()
+                    for i, nombre_colono in enumerate(colonos_validos):
+                        nombre_clean = nombre_colono.strip()
                         
-                        # Crear código único para cada familiar
+                        # Crear código único para cada colono
                         codigo_base = f"{prefijo_codigo}{nombre_clean.lower().replace(' ', '')}"
                         
                         if incluir_numero:
@@ -243,13 +243,13 @@ def main():
                             })
                     
                     if qr_results:
-                        st.success(f"✅ {len(qr_results)} QR(s) generados exitosamente para la familia")
+                        st.success(f"✅ {len(qr_results)} QR(s) generados exitosamente")
                         
                         # Guardar en session state para mostrar
                         st.session_state.qr_generados = qr_results
-                        st.session_state.familia_info = {
+                        st.session_state.colonos_info = {
                             'domicilio': domicilio_clean,
-                            'total_familiares': len(qr_results)
+                            'total_colonos': len(qr_results)
                         }
                     else:
                         st.error("❌ Error generando los códigos QR")
@@ -257,11 +257,11 @@ def main():
     # Mostrar QRs generados
     if 'qr_generados' in st.session_state and st.session_state.qr_generados:
         st.markdown("---")
-        st.subheader("🎯 QRs Generados para la Familia")
+        st.subheader("🎯 QRs Generados")
         
-        familia_info = st.session_state.familia_info
-        st.markdown(f"**🏠 Domicilio:** {familia_info['domicilio']}")
-        st.markdown(f"**👨‍👩‍👧‍👦 Total Familiares:** {familia_info['total_familiares']} persona(s)")
+        colonos_info = st.session_state.colonos_info
+        st.markdown(f"**🏠 Domicilio:** {colonos_info['domicilio']}")
+        st.markdown(f"**👤 Total Colonos:** {colonos_info['total_colonos']} persona(s)")
         
         # Mostrar QRs en grid
         qr_results = st.session_state.qr_generados
@@ -343,7 +343,7 @@ def main():
                 
                 if zip_bytes:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-                    zip_filename = f"QRs_Familia_{timestamp}.zip"
+                    zip_filename = f"QRs_Colonos_{timestamp}.zip"
                     
                     st.download_button(
                         "📦 Descargar Todos los QRs (ZIP)",
@@ -357,10 +357,10 @@ def main():
         # Información de uso
         st.markdown("---")
         st.info("""
-        📋 **Instrucciones para cada familiar:**
-        1. 📱 Cada familiar usa **su propio código QR** como password
+        📋 **Instrucciones para cada colono:**
+        1. 📱 Cada colono usa **su propio código QR** como password
         2. 🔑 En el Portal Colonos, cada uno ingresa su **nombre completo** + **su código específico**
-        3. 💾 **Guarda estos códigos** y entrega a cada familiar el suyo
+        3. 💾 **Guarda estos códigos** y entrega a cada colono el suyo
         4. 🏠 Todos pertenecen al mismo domicilio pero tienen acceso individual
         """)
         
@@ -370,10 +370,10 @@ def main():
                 st.markdown(f"**{qr_data['nombre']}:** `{qr_data['codigo']}`")
         
         # Botón limpiar
-        if st.button("🗑️ Limpiar y Generar Nueva Familia", key="clear_results"):
+        if st.button("🗑️ Limpiar y Generar Nuevos QRs", key="clear_results"):
             del st.session_state.qr_generados
-            del st.session_state.familia_info
-            st.session_state.familiares_list = [""]  # Reset a un campo vacío
+            del st.session_state.colonos_info
+            st.session_state.colonos_list = [""]  # Reset a un campo vacío
             st.rerun()
     
     # Footer

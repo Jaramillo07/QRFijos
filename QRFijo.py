@@ -118,6 +118,45 @@ def main():
     if 'colonos_list' not in st.session_state:
         st.session_state.colonos_list = [""]  # Comenzar con un campo vacío
     
+    # Gestión de colonos (fuera del formulario)
+    st.subheader("👤 Colonos (Cada uno tendrá su QR)")
+    
+    # Mostrar campos para colonos
+    colonos_input = []
+    
+    # Crear columnas para organizar mejor
+    for i, colono in enumerate(st.session_state.colonos_list):
+        col1, col2 = st.columns([4, 1])
+        
+        with col1:
+            nombre = st.text_input(
+                f"👤 Colono #{i+1}:",
+                value=colono,
+                placeholder=f"Ej: Jesús Jaramillo González, María Elena González, etc.",
+                key=f"colono_{i}",
+                help="Nombre completo del colono"
+            )
+            colonos_input.append(nombre)
+        
+        with col2:
+            # Botón para eliminar (solo si hay más de 1)
+            if len(st.session_state.colonos_list) > 1:
+                if st.button(f"🗑️", key=f"remove_{i}", help="Eliminar colono"):
+                    st.session_state.colonos_list.pop(i)
+                    st.rerun()
+    
+    # Actualizar la lista de colonos
+    st.session_state.colonos_list = colonos_input
+    
+    # Botón para agregar más colonos
+    col1, col2, col3 = st.columns([2, 1, 2])
+    with col2:
+        if st.button("➕ Agregar Colono"):
+            st.session_state.colonos_list.append("")
+            st.rerun()
+    
+    st.markdown("---")
+    
     # Formulario principal
     with st.form("qr_familia_form", clear_on_submit=True):
         st.subheader("📝 Información del Domicilio")
@@ -128,42 +167,6 @@ def main():
             placeholder="Ej: Calle Girasol #203, Lote 15",
             help="Dirección o número de lote (aplica para toda la familia)"
         )
-        
-        st.markdown("---")
-        st.subheader("👤 Colonos (Cada uno tendrá su QR)")
-        
-        # Mostrar campos para colonos
-        colonos_input = []
-        
-        # Crear columnas para organizar mejor
-        for i, colono in enumerate(st.session_state.colonos_list):
-            col1, col2 = st.columns([4, 1])
-            
-            with col1:
-                nombre = st.text_input(
-                    f"👤 Colono #{i+1}:",
-                    value=colono,
-                    placeholder=f"Ej: Jesús Jaramillo González, María Elena González, etc.",
-                    key=f"colono_{i}",
-                    help="Nombre completo del colono"
-                )
-                colonos_input.append(nombre)
-            
-            with col2:
-                # Botón para eliminar (solo si hay más de 1)
-                if len(st.session_state.colonos_list) > 1:
-                    if st.form_submit_button(f"🗑️", key=f"remove_{i}", help="Eliminar colono"):
-                        st.session_state.colonos_list.pop(i)
-                        st.rerun()
-        
-        # Botón para agregar más colonos
-        col1, col2, col3 = st.columns([2, 1, 2])
-        with col2:
-            if st.form_submit_button("➕ Agregar Colono"):
-                st.session_state.colonos_list.append("")
-                st.rerun()
-        
-        st.markdown("---")
         
         # Opciones de generación
         st.markdown("**⚙️ Opciones de Generación:**")
@@ -195,11 +198,8 @@ def main():
         
         # Procesar formulario
         if generar_btn:
-            # Actualizar la lista de colonos
-            st.session_state.colonos_list = colonos_input
-            
-            # Filtrar nombres vacíos
-            colonos_validos = [nombre.strip() for nombre in colonos_input if nombre.strip()]
+            # Filtrar nombres vacíos de la lista actual
+            colonos_validos = [nombre.strip() for nombre in st.session_state.colonos_list if nombre.strip()]
             
             if not domicilio.strip():
                 st.error("❌ Debe ingresar el domicilio")
